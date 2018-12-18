@@ -1,35 +1,43 @@
 <html>
 <head>
     <title>Session</title>
+    <script>
+    function chat(roomNumber){
+            var curForm = document.getElementById("next_page");
+            curForm.action = "/joinRoom/" + (parseInt(roomNumber))
+            curForm.submit();
+        }
+    </script>
 
 </head>
 <body>
 
-  <p>{{usernames}}</p>
   <h3 style='color: #ccc;font-size: 30px;'>No message yet..</h3>
 <div class="message_holder"></div>
 
     <form action="" method="POST">
       <input type="text" class="username" placeholder="User Name"/>
       <input type="text" class="message" placeholder="Messages"/>
-      <input type="submit"/>
+      <button class="next" onclick=chat("{{room}}")>Next </button>
     </form>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
     <script type="text/javascript">
+
       var socket = io.connect('http://' + document.domain + ':' + location.port);
 
 
+
       socket.on( 'connect', function() {
-        socket.emit( 'my event', {
-          data: 'User Connected'
-        } )
+        socket.emit( 'connect to room',
+          {data: "{{room}}" }
+         )
         var form = $( 'form' ).on( 'submit', function( e ) {
           e.preventDefault()
           let user_name = $( 'input.username' ).val()
           let user_input = $( 'input.message' ).val()
-          socket.emit( 'my event', {
+          socket.emit( 'message', {
             user_name : user_name,
             message : user_input
           } )
@@ -37,7 +45,6 @@
         } )
       } )
       socket.on( 'my response', function( msg ) {
-        console.log( msg )
         if( typeof msg.user_name !== 'undefined' ) {
           $( 'h3' ).remove()
           $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' )
